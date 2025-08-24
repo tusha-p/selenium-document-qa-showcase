@@ -4,18 +4,20 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
+import java.io.File;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class BaseTest {
     protected WebDriver driver;
     
-    @BeforeClass
-    public void setupClass() {
-        // Optional: You can add WebDriverManager setup here if using it
-        // WebDriverManager.chromedriver().setup();
+    @BeforeMethod
+    public void setUp() {
+        initializeDriver();
     }
     
     protected void initializeDriver() {
@@ -26,29 +28,35 @@ public class BaseTest {
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
         
-        // Add unique user data directory to prevent conflicts
-        String uniqueUserDataDir = "/tmp/chrome-profile-" + UUID.randomUUID().toString();
-        options.addArguments("--user-data-dir=" + uniqueUserDataDir);
+        // Use a different approach - set user data directory via preferences
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.default_content_settings.popups", 0);
+        prefs.put("download.default_directory", System.getProperty("java.io.tmpdir"));
+        options.setExperimentalOption("prefs", prefs);
+        
+        // OR try using incognito mode instead
+        options.addArguments("--incognito");
         
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().window().maximize();
     }
     
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
-            driver.quit();
+            try {
+                driver.quit();
+            } catch (Exception e) {
+                // Ignore any exceptions during quit
+            }
         }
-    }
-    
-    // Optional: If you need to get the driver instance
-    public WebDriver getDriver() {
-        return driver;
-    }
-    
-    // Optional: If you need to navigate to a URL
-    public void navigateTo(String url) {
-        driver.get(url);
+        
+        // Force kill any remaining Chrome processes
+        try {
+            Runtime.getRuntime().exec("pkill -f chrome");
+            Runtime.getRuntime().exec("pkill -f chromedriver");
+        } catch (Exception e) {
+            // Ignore exceptions
+        }
     }
 }
