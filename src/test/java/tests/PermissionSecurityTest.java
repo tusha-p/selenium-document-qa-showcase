@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 // This class inherits from BaseTest, so it gets the driver setup/teardown
-public class PermissionSecurityTest extends BaseTest {
+public class PermissionSecurityTest {
 
     @Test
     public void standardUserCannotAccessAdminPage() {
