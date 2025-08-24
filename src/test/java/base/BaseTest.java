@@ -4,6 +4,9 @@ public class BaseTest {
    @BeforeEach
 public void initializeDriver() {
     try {
+         Runtime.getRuntime().exec("pkill -f chrome");
+    Runtime.getRuntime().exec("pkill -f chromedriver");
+    Thread.sleep(1000); // Wait for processes to termina
         // DISABLE Selenium Manager to avoid conflicts
         System.setProperty("webdriver.selenium_manager", "false");
         
