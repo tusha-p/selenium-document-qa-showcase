@@ -41,7 +41,7 @@ public class PermissionSecurityTest extends BaseTest {
         Assert.assertTrue(isRedirectedToLoginPage, "Security Vulnerability: Standard user was able to access the admin page directly.");
     }
 
-    @Test
+    //@Test
   /*  public void adminUserCanAccessAdminPage() {
         // This test would require a valid admin login first.
         // Since we don't have a real app, we'll just navigate to the page.
