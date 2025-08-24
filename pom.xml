@@ -30,8 +30,22 @@
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+             <!-- REST Assured for API Testing -->
+     <dependency>
+        <groupId>io.restassured</groupId>
+        <artifactId>rest-assured</artifactId>
+        <version>5.3.2</version>
+        <scope>test</scope>
+     </dependency>
 
+    <!-- H2 Database for DB Testing Demo -->
+    <dependency>
+       <groupId>com.h2database</groupId>
+       <artifactId>h2</artifactId>
+       <version>2.2.224</version>
+       <scope>test</scope>
+    </dependency>
+    </dependencies>
     <build>
         <plugins>
             <!-- Maven Compiler Plugin -->
