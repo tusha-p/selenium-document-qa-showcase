@@ -19,33 +19,34 @@ public class BaseTest {
     
     protected void initializeDriver() {
         try {
-            // Kill any existing Chrome processes first
-            killChromeProcesses();
+            // Force kill all Chrome processes first
+            forceKillChromeProcesses();
             
             ChromeOptions options = new ChromeOptions();
             
-            // DO NOT use --user-data-dir argument
+            // EXPLICITLY set user data directory to a non-persistent location
+            options.addArguments("--user-data-dir=/tmp/chrome-temp-" + System.currentTimeMillis());
+            
+            // Alternative: Use incognito mode which ignores user data dir
+            // options.addArguments("--incognito");
+            
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--remote-allow-origins=*");
-            options.addArguments("--headless");
+            options.addArguments("--headless=new"); // Use the new headless mode
             options.addArguments("--disable-gpu");
             options.addArguments("--window-size=1920,1080");
             
-            // Add these to ensure clean sessions
+            // Add these to prevent any persistence issues
             options.addArguments("--disable-extensions");
-            options.addArguments("--disable-plugins");
-            options.addArguments("--disable-notifications");
-            options.addArguments("--incognito"); // Use incognito mode instead of user-data-dir
-            
-            // Set language and other preferences
-            options.addArguments("--lang=en-US");
-            options.addArguments("--start-maximized");
+            options.addArguments("--no-default-browser-check");
+            options.addArguments("--no-first-run");
+            options.addArguments("--disable-background-networking");
+            options.addArguments("--disable-sync");
             
             WebDriverManager.chromedriver().setup();
             driver = new ChromeDriver(options);
             
-            // Set implicit wait
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
             
@@ -56,41 +57,25 @@ public class BaseTest {
     
     @AfterMethod
     public void tearDown() {
-        // Quit driver first
         if (driver != null) {
             try {
                 driver.quit();
             } catch (Exception e) {
-                // Ignore any exceptions during quit
+                // Ignore quit errors
             }
         }
-        
-        // Force kill any remaining Chrome processes
-        try {
-            killChromeProcesses();
-        } catch (Exception e) {
-            // Ignore exceptions
-        }
+        forceKillChromeProcesses();
     }
     
-    // Method to kill Chrome processes
-    private void killChromeProcesses() {
+    private void forceKillChromeProcesses() {
         try {
-            String os = System.getProperty("os.name").toLowerCase();
-            
-            if (os.contains("win")) {
-                // Windows
-                Runtime.getRuntime().exec("taskkill /f /im chrome.exe");
-                Runtime.getRuntime().exec("taskkill /f /im chromedriver.exe");
-            } else {
-                // Linux/Mac (Codespaces is Linux-based)
-                Runtime.getRuntime().exec("pkill -9 -f chrome");
-                Runtime.getRuntime().exec("pkill -9 -f chromedriver");
-            }
-            // Wait a bit for processes to terminate
+            // More aggressive process killing for Linux
+            Runtime.getRuntime().exec("pkill -9 -f chrome");
+            Runtime.getRuntime().exec("pkill -9 -f chromedriver");
+            Runtime.getRuntime().exec("pkill -9 -f google-chrome");
             Thread.sleep(2000);
         } catch (Exception e) {
-            System.out.println("Warning: Could not kill Chrome processes: " + e.getMessage());
+            System.out.println("Process cleanup warning: " + e.getMessage());
         }
     }
 }
