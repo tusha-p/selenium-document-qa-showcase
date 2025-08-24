@@ -21,25 +21,57 @@ public class BaseTest {
     }
     
     protected void initializeDriver() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-        
-        // Use a different approach - set user data directory via preferences
-        Map<String, Object> prefs = new HashMap<>();
-        prefs.put("profile.default_content_settings.popups", 0);
-        prefs.put("download.default_directory", System.getProperty("java.io.tmpdir"));
-        options.setExperimentalOption("prefs", prefs);
-        
-        // OR try using incognito mode instead
-        options.addArguments("--incognito");
-        
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+          ChromeOptions options = new ChromeOptions();
+    
+    // Create a unique temporary directory for each test
+    String uniqueUserDataDir = System.getProperty("java.io.tmpdir") + 
+                              "/chrome_profile_" + UUID.randomUUID();
+    options.addArguments("--user-data-dir=" + uniqueUserDataDir);
+    
+    // Add other necessary options
+    options.addArguments("--no-sandbox");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--remote-allow-origins=*");
+    options.addArguments("--headless"); // if running in headless mode
+    
+    WebDriverManager.chromedriver().setup();
+    driver = new ChromeDriver(options);
     }
+    AfterEach
+public void tearDown() {
+    if (driver != null) {
+        driver.quit();
+        
+        // Optional: Clean up the temporary directory
+        try {
+            File userDataDir = new File(options.getArguments()
+                .stream()
+                .filter(arg -> arg.startsWith("--user-data-dir="))
+                .findFirst()
+                .orElse("")
+                .replace("--user-data-dir=", ""));
+            
+            if (userDataDir.exists()) {
+                deleteDirectory(userDataDir);
+            }
+        } catch (Exception e) {
+            // Handle cleanup exception if needed
+        }
+    }
+}
+
+// Helper method to delete directory recursively
+private void deleteDirectory(File directory) {
+    if (directory.isDirectory()) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                deleteDirectory(file);
+            }
+        }
+    }
+    directory.delete();
+}
     
     @AfterMethod
     public void tearDown() {
