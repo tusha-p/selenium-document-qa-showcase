@@ -7,13 +7,10 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.io.File;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class BaseTest {
     protected WebDriver driver;
-    protected ChromeOptions options;
-    protected String userDataDirPath;
     
     @BeforeMethod
     public void setUp() {
@@ -25,19 +22,9 @@ public class BaseTest {
             // Kill any existing Chrome processes first
             killChromeProcesses();
             
-            options = new ChromeOptions();
+            ChromeOptions options = new ChromeOptions();
             
-            // Create a unique temporary directory for each test
-            userDataDirPath = System.getProperty("java.io.tmpdir") + 
-                              "chrome_profile_" + UUID.randomUUID();
-            
-            // Ensure the directory exists
-            File userDataDir = new File(userDataDirPath);
-            if (!userDataDir.exists()) {
-                userDataDir.mkdirs();
-            }
-            
-            options.addArguments("--user-data-dir=" + userDataDirPath);
+            // DO NOT use --user-data-dir argument
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--remote-allow-origins=*");
@@ -45,13 +32,22 @@ public class BaseTest {
             options.addArguments("--disable-gpu");
             options.addArguments("--window-size=1920,1080");
             
-            // Add these to prevent sharing issues
-            options.addArguments("--no-first-run");
-            options.addArguments("--no-default-browser-check");
+            // Add these to ensure clean sessions
             options.addArguments("--disable-extensions");
+            options.addArguments("--disable-plugins");
+            options.addArguments("--disable-notifications");
+            options.addArguments("--incognito"); // Use incognito mode instead of user-data-dir
+            
+            // Set language and other preferences
+            options.addArguments("--lang=en-US");
+            options.addArguments("--start-maximized");
             
             WebDriverManager.chromedriver().setup();
             driver = new ChromeDriver(options);
+            
+            // Set implicit wait
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
             
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize ChromeDriver", e);
@@ -69,37 +65,12 @@ public class BaseTest {
             }
         }
         
-        // Clean up the temporary directory
-        try {
-            if (userDataDirPath != null) {
-                File userDataDir = new File(userDataDirPath);
-                if (userDataDir.exists()) {
-                    deleteDirectory(userDataDir);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Warning: Could not clean up user data directory: " + e.getMessage());
-        }
-        
         // Force kill any remaining Chrome processes
         try {
             killChromeProcesses();
         } catch (Exception e) {
             // Ignore exceptions
         }
-    }
-    
-    // Helper method to delete directory recursively
-    private void deleteDirectory(File directory) {
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    deleteDirectory(file);
-                }
-            }
-        }
-        directory.delete();
     }
     
     // Method to kill Chrome processes
@@ -112,12 +83,12 @@ public class BaseTest {
                 Runtime.getRuntime().exec("taskkill /f /im chrome.exe");
                 Runtime.getRuntime().exec("taskkill /f /im chromedriver.exe");
             } else {
-                // Linux/Mac
-                Runtime.getRuntime().exec("pkill -f chrome");
-                Runtime.getRuntime().exec("pkill -f chromedriver");
+                // Linux/Mac (Codespaces is Linux-based)
+                Runtime.getRuntime().exec("pkill -9 -f chrome");
+                Runtime.getRuntime().exec("pkill -9 -f chromedriver");
             }
             // Wait a bit for processes to terminate
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (Exception e) {
             System.out.println("Warning: Could not kill Chrome processes: " + e.getMessage());
         }
