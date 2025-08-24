@@ -17,34 +17,11 @@ public class BaseTest {
         initializeDriver();
     }
     
-   /* protected void initializeDriver() {
-        try {
-            // Clean up any Firefox processes
-            cleanUpFirefoxProcesses();
-            
-            FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("--headless");
-            options.addArguments("--width=1920");
-            options.addArguments("--height=1080");
-            options.addArguments("--disable-gpu");
-            
-            // Firefox doesn't have user data directory issues like Chrome
-            WebDriverManager.firefoxdriver().setup();
-            driver = new FirefoxDriver(options);
-            
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-            driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize FirefoxDriver: " + e.getMessage(), e);
-        }
-    }*/
-
-    protected void initializeDriver() {
-    try {
-       try {
-  try {
-    System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+protected void initializeDriver() {
+  
+ try {
+    // WebDriverManager will automatically download and setup ChromeDriver
+    WebDriverManager.chromedriver().setup();
     
     ChromeOptions options = new ChromeOptions();
     options.addArguments("--no-sandbox");
@@ -52,10 +29,6 @@ public class BaseTest {
     options.addArguments("--headless=new");
     options.addArguments("--disable-gpu");
     options.addArguments("--window-size=1920,1080");
-    
-    // Use /tmp directory which has write permissions
-    String userDataDir = "/tmp/chrome-user-data-" + java.util.UUID.randomUUID();
-    options.addArguments("--user-data-dir=" + userDataDir);
     
     driver = new ChromeDriver(options);
     
