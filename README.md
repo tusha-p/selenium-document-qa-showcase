@@ -9,11 +9,37 @@ To showcase testing methodologies for core DMS challenges:
 - Permission & Security (RBAC) Testing
 - Content Integrity Checks
 
-## Planned Tech Stack
-*   Selenium WebDriver (Java)
-*   TestNG
-*   Maven
-*   A simple mock web application for tests to run against
+## Tech Stack
+- Selenium WebDriver (Java)
+- TestNG
+- Maven
+- A simple mock web application for tests to run against
 
-## Status
-🚧 **Planning Phase** - Structure and initial setup.
+## Project Structure
+```text
+selenium-document-qa-showcase/
+├── src/test/java/
+│   ├── base/
+│   │   └── BaseTest.java
+│   ├── pages/
+│   │   └── LoginPage.java
+│   └── tests/
+│       └── PermissionSecurityTest.java
+├── src/test/resources/
+├── testng.xml
+├── pom.xml
+└── README.md
+
+Status
+
+✅ Operational - Test framework built and functional
+✅ Security Tests Implemented - RBAC validation logic complete
+✅ CI/CD Ready - Configured for GitHub Codespaces execution
+🔧 Mock Application - Planned for future test scenarios
+
+## Test Execution
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=SimpleFrameworkTest
