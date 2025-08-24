@@ -43,7 +43,7 @@ public class BaseTest {
     protected void initializeDriver() {
     try {
        try {
-    // Set ChromeDriver path directly to avoid WebDriverManager issues
+  try {
     System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
     
     ChromeOptions options = new ChromeOptions();
@@ -53,15 +53,15 @@ public class BaseTest {
     options.addArguments("--disable-gpu");
     options.addArguments("--window-size=1920,1080");
     
-    // Add this line to fix the user data directory conflict
-    options.addArguments("--user-data-dir=/tmp/chrome-data-" + java.util.UUID.randomUUID());
+    // Use /tmp directory which has write permissions
+    String userDataDir = "/tmp/chrome-user-data-" + java.util.UUID.randomUUID();
+    options.addArguments("--user-data-dir=" + userDataDir);
     
     driver = new ChromeDriver(options);
     
 } catch (Exception e) {
     throw new RuntimeException("Failed to initialize ChromeDriver", e);
 }
-        
 }
     
     @AfterMethod
