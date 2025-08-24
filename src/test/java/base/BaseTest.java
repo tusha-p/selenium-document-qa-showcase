@@ -1,16 +1,19 @@
 public class BaseTest {
     protected WebDriver driver;
 
-   @BeforeEach
+@BeforeEach
 public void initializeDriver() {
     try {
-         Runtime.getRuntime().exec("pkill -f chrome");
-    Runtime.getRuntime().exec("pkill -f chromedriver");
-    Thread.sleep(1000); // Wait for processes to termina
-        // DISABLE Selenium Manager to avoid conflicts
+        // 1. COMPLETELY DISABLE SELENIUM MANAGER - This is the key!
         System.setProperty("webdriver.selenium_manager", "false");
         
+        // 2. Use explicit ChromeDriver path (make sure it exists)
         System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+        
+        // 3. Kill any existing Chrome processes
+        Runtime.getRuntime().exec("pkill -f chrome");
+        Runtime.getRuntime().exec("pkill -f chromedriver");
+        Thread.sleep(2000); // Wait 2 seconds for cleanup
         
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
@@ -19,9 +22,12 @@ public void initializeDriver() {
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
         
-        // Add unique user data directory
-        String userDataDir = "/tmp/chrome-data-" + java.util.UUID.randomUUID();
+        // 4. Use a unique user data directory with proper permissions
+        String userDataDir = "/tmp/chrome-test-" + System.currentTimeMillis();
         options.addArguments("--user-data-dir=" + userDataDir);
+        
+        // 5. Create the directory first to avoid permission issues
+        new File(userDataDir).mkdirs();
         
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
