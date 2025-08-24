@@ -1,8 +1,8 @@
 package base;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -19,39 +19,24 @@ public class BaseTest {
     
     protected void initializeDriver() {
         try {
-            // Force kill all Chrome processes first
-            forceKillChromeProcesses();
+            // Clean up any Firefox processes
+            cleanUpFirefoxProcesses();
             
-            ChromeOptions options = new ChromeOptions();
-            
-            // EXPLICITLY set user data directory to a non-persistent location
-            options.addArguments("--user-data-dir=/tmp/chrome-temp-" + System.currentTimeMillis());
-            
-            // Alternative: Use incognito mode which ignores user data dir
-            // options.addArguments("--incognito");
-            
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-            options.addArguments("--remote-allow-origins=*");
-            options.addArguments("--headless=new"); // Use the new headless mode
+            FirefoxOptions options = new FirefoxOptions();
+            options.addArguments("--headless");
+            options.addArguments("--width=1920");
+            options.addArguments("--height=1080");
             options.addArguments("--disable-gpu");
-            options.addArguments("--window-size=1920,1080");
             
-            // Add these to prevent any persistence issues
-            options.addArguments("--disable-extensions");
-            options.addArguments("--no-default-browser-check");
-            options.addArguments("--no-first-run");
-            options.addArguments("--disable-background-networking");
-            options.addArguments("--disable-sync");
-            
-            WebDriverManager.chromedriver().setup();
-            driver = new ChromeDriver(options);
+            // Firefox doesn't have user data directory issues like Chrome
+            WebDriverManager.firefoxdriver().setup();
+            driver = new FirefoxDriver(options);
             
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
             
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize ChromeDriver", e);
+            throw new RuntimeException("Failed to initialize FirefoxDriver: " + e.getMessage(), e);
         }
     }
     
@@ -64,18 +49,28 @@ public class BaseTest {
                 // Ignore quit errors
             }
         }
-        forceKillChromeProcesses();
+        cleanUpFirefoxProcesses();
     }
     
-    private void forceKillChromeProcesses() {
+    private void cleanUpFirefoxProcesses() {
         try {
-            // More aggressive process killing for Linux
-            Runtime.getRuntime().exec("pkill -9 -f chrome");
-            Runtime.getRuntime().exec("pkill -9 -f chromedriver");
-            Runtime.getRuntime().exec("pkill -9 -f google-chrome");
-            Thread.sleep(2000);
+            String[] commands = {
+                "pkill -9 -f firefox",
+                "pkill -9 -f geckodriver",
+                "killall -9 firefox",
+                "killall -9 geckodriver"
+            };
+            
+            for (String command : commands) {
+                try {
+                    Runtime.getRuntime().exec(command);
+                } catch (Exception e) {
+                    // Ignore command failures
+                }
+            }
+            Thread.sleep(1000);
         } catch (Exception e) {
-            System.out.println("Process cleanup warning: " + e.getMessage());
+            System.out.println("Firefox cleanup warning: " + e.getMessage());
         }
     }
 }
