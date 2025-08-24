@@ -1,42 +1,23 @@
-public class BaseTest {
-    protected WebDriver driver;
+package base;
 
-@BeforeEach
-public void initializeDriver() {
-    try {
-        // 1. COMPLETELY DISABLE SELENIUM MANAGER - This is the key!
-        System.setProperty("webdriver.selenium_manager", "false");
-        
-        // 2. Use explicit ChromeDriver path (make sure it exists)
-        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
-        
-        // 3. Kill any existing Chrome processes
-        Runtime.getRuntime().exec("pkill -f chrome");
-        Runtime.getRuntime().exec("pkill -f chromedriver");
-        Thread.sleep(2000); // Wait 2 seconds for cleanup
-        
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+
+public class BaseTest {
+    public WebDriver driver;
+
+    @BeforeMethod
+    public void initializeDriver() {
+        // Your existing setup code
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--headless=new");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-        
-        // 4. Use a unique user data directory with proper permissions
-        String userDataDir = "/tmp/chrome-test-" + System.currentTimeMillis();
-        options.addArguments("--user-data-dir=" + userDataDir);
-        
-        // 5. Create the directory first to avoid permission issues
-        new File(userDataDir).mkdirs();
-        
+        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1920,1080");
         driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        
-    } catch (Exception e) {
-        throw new RuntimeException("Failed to initialize ChromeDriver", e);
     }
-}
-    @AfterEach
+
+    @AfterMethod
     public void tearDown() {
         if (driver != null) {
             driver.quit();
