@@ -4,12 +4,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 // This class inherits from BaseTest, so it gets the driver setup/teardown
-public class PermissionSecurityTest {
-
+public class PermissionSecurityTest extends BaseTest {
+ // Get the forwarded URL from a system property or environment variable
+    private static final String BASE_URL = System.getProperty("app.url", "http://localhost:8080");
+    
     @Test
     public void standardUserCannotAccessAdminPage() {
-        // 1. Navigate directly to the admin page (bypassing UI for a security test)
-        driver.get("http://localhost:8080/admin.html");
+        // 1. Navigate directly to the admin page using the correct base URL
+        driver.get(BASE_URL + "/admin.html");
 
         // 2. Verification: Assert that we are NOT on the admin page.
         //    A secure system should redirect us to a login page or show an error.
@@ -37,7 +39,7 @@ public class PermissionSecurityTest {
         // Since we don't have a real app, we'll just navigate to the page.
         // This test is currently expected to FAIL, which demonstrates a important concept.
 
-        driver.get("http://localhost:8080/admin.html");
+        driver.get(BASE_URL + "/admin.html");
 
         // This is what we would EXPECT for an admin user after logging in.
         // We are asserting the OPPOSITE to show the test is working and would fail without a proper login.
