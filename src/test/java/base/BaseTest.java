@@ -13,7 +13,7 @@ public class BaseTest {
     public void initializeDriver() {
         // Your existing setup code
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1920,1080");
+        options.addArguments("--headless=new", "--no-sandbox");
         driver = new ChromeDriver(options);
     }
 
