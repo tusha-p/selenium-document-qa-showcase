@@ -42,21 +42,26 @@ public class BaseTest {
 
     protected void initializeDriver() {
     try {
-        // Set ChromeDriver path directly to avoid WebDriverManager issues
-        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+       try {
+    // Set ChromeDriver path directly to avoid WebDriverManager issues
+    System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+    
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--no-sandbox");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--headless=new");
+    options.addArguments("--disable-gpu");
+    options.addArguments("--window-size=1920,1080");
+    
+    // Add this line to fix the user data directory conflict
+    options.addArguments("--user-data-dir=/tmp/chrome-data-" + java.util.UUID.randomUUID());
+    
+    driver = new ChromeDriver(options);
+    
+} catch (Exception e) {
+    throw new RuntimeException("Failed to initialize ChromeDriver", e);
+}
         
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--headless=new");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-        
-        driver = new ChromeDriver(options);
-        
-    } catch (Exception e) {
-        throw new RuntimeException("Failed to initialize ChromeDriver", e);
-    }
 }
     
     @AfterMethod
