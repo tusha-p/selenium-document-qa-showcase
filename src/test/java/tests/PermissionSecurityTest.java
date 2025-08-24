@@ -7,6 +7,8 @@ import org.testng.annotations.Test;
 public class PermissionSecurityTest extends BaseTest {
  // Get the forwarded URL from a system property or environment variable
     private static final String BASE_URL = System.getProperty("app.url", "http://localhost:8080");
+  // private static final String BASE_URL = System.getProperty("app.url", "http://localhost:8080");
+    private static final String LOGIN_PAGE_URL = BASE_URL + "/login.html";
     
     @Test
     public void standardUserCannotAccessAdminPage() {
@@ -21,16 +23,22 @@ public class PermissionSecurityTest extends BaseTest {
 
         // This assertion checks that we are not on the admin URL.
         // If we are, it means the security check failed.
-        Assert.assertFalse(isOnAdminPage, "Security Vulnerability: Standard user was able to access the admin page directly.");
+       // Assert.assertFalse(isOnAdminPage, "Security Vulnerability: Standard user was able to access the admin page directly.");
 
         // Additional robust checks that a security breach happened:
-        if (isOnAdminPage) {
+      /* if (isOnAdminPage) {
             // If we are on the admin page, check for content that should only be visible to admins
             if (pageSource.contains("User Management") || pageTitle.contains("admin")) {
                 Assert.fail("Critical Security Failure: Standard user can see admin-only content.");
             }
-        }
+        }*/
         // If all the above passes, the test passes. The security control worked.
+       String currentUrl = driver.getCurrentUrl();
+        boolean isRedirectedToLoginPage = currentUrl.contains("login") || currentUrl.contains("permission-denied");
+
+        // This assertion checks that we were redirected away from the admin page,
+        // which demonstrates that the security control worked.
+        Assert.assertTrue(isRedirectedToLoginPage, "Security Vulnerability: Standard user was able to access the admin page directly.");
     }
 
     @Test
