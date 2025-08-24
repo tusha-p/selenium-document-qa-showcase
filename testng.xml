@@ -4,15 +4,14 @@
     <test name="ChromeTests">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <!-- We will add class names here later, e.g.: -->
-            <!-- <class name="tests.PermissionSecurityTest"/> -->
+            <class name="tests.PermissionSecurityTest"/>
         </classes>
     </test>
 
     <test name="FirefoxTests">
         <parameter name="browser" value="firefox"/>
         <classes>
-            <!-- We will add class names here later -->
+            <class name="tests.PermissionSecurityTest"/>
         </classes>
     </test>
 </suite>
