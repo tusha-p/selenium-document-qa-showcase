@@ -16,7 +16,6 @@ To showcase testing methodologies for core DMS challenges:
 - A simple mock web application for tests to run against
 
 ## Project Structure
-```text
 selenium-document-qa-showcase/
 ├── src/test/java/
 │   ├── base/
@@ -30,12 +29,11 @@ selenium-document-qa-showcase/
 ├── pom.xml
 └── README.md
 
-Status
-
-✅ Operational - Test framework built and functional
-✅ Security Tests Implemented - RBAC validation logic complete
-✅ CI/CD Ready - Configured for GitHub Codespaces execution
-🔧 Mock Application - Planned for future test scenarios
+## Status
+✅ **Operational** - Test framework built and functional  
+✅ **Security Tests Implemented** - RBAC validation logic complete  
+✅ **CI/CD Ready** - Configured for GitHub Codespaces execution  
+🔧 **Mock Application** - Planned for future test scenarios  
 
 ## Test Execution
 # Run all tests
@@ -43,3 +41,4 @@ mvn test
 
 # Run specific test class
 mvn test -Dtest=SimpleFrameworkTest
+
