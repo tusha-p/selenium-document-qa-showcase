@@ -11,9 +11,9 @@ public class BaseTest {
 
     protected WebDriver driver;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     @Parameters("browser")
-    public void setUp(String browser) {
+    public void initializeDriver(String browser) {
         // Initialize the WebDriver based on the parameter from testng.xml
         if (browser.equalsIgnoreCase("chrome")) {
             // You can use WebDriverManager here in a real project to avoid manual driver setup
@@ -31,8 +31,8 @@ public class BaseTest {
         driver.get("http://localhost:8080"); 
     }
 
-    @AfterMethod
-    public void tearDown() {
+    @AfterMethod(alwaysRun = true)
+    public void tearDownDriver() {
         if (driver != null) {
             driver.quit();
         }
