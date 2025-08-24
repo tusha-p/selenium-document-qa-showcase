@@ -3,17 +3,17 @@ package base;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class BaseTest {
     protected WebDriver driver;
+    protected ChromeOptions options;
+    protected String userDataDirPath;
     
     @BeforeMethod
     public void setUp() {
@@ -21,60 +21,46 @@ public class BaseTest {
     }
     
     protected void initializeDriver() {
-          ChromeOptions options = new ChromeOptions();
-    
-    // Create a unique temporary directory for each test
-    String uniqueUserDataDir = System.getProperty("java.io.tmpdir") + 
-                              "/chrome_profile_" + UUID.randomUUID();
-    options.addArguments("--user-data-dir=" + uniqueUserDataDir);
-    
-    // Add other necessary options
-    options.addArguments("--no-sandbox");
-    options.addArguments("--disable-dev-shm-usage");
-    options.addArguments("--remote-allow-origins=*");
-    options.addArguments("--headless"); // if running in headless mode
-    
-    WebDriverManager.chromedriver().setup();
-    driver = new ChromeDriver(options);
-    }
-    AfterEach
-public void tearDown() {
-    if (driver != null) {
-        driver.quit();
-        
-        // Optional: Clean up the temporary directory
         try {
-            File userDataDir = new File(options.getArguments()
-                .stream()
-                .filter(arg -> arg.startsWith("--user-data-dir="))
-                .findFirst()
-                .orElse("")
-                .replace("--user-data-dir=", ""));
+            // Kill any existing Chrome processes first
+            killChromeProcesses();
             
-            if (userDataDir.exists()) {
-                deleteDirectory(userDataDir);
+            options = new ChromeOptions();
+            
+            // Create a unique temporary directory for each test
+            userDataDirPath = System.getProperty("java.io.tmpdir") + 
+                              "chrome_profile_" + UUID.randomUUID();
+            
+            // Ensure the directory exists
+            File userDataDir = new File(userDataDirPath);
+            if (!userDataDir.exists()) {
+                userDataDir.mkdirs();
             }
+            
+            options.addArguments("--user-data-dir=" + userDataDirPath);
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--headless");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+            
+            // Add these to prevent sharing issues
+            options.addArguments("--no-first-run");
+            options.addArguments("--no-default-browser-check");
+            options.addArguments("--disable-extensions");
+            
+            WebDriverManager.chromedriver().setup();
+            driver = new ChromeDriver(options);
+            
         } catch (Exception e) {
-            // Handle cleanup exception if needed
+            throw new RuntimeException("Failed to initialize ChromeDriver", e);
         }
     }
-}
-
-// Helper method to delete directory recursively
-private void deleteDirectory(File directory) {
-    if (directory.isDirectory()) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                deleteDirectory(file);
-            }
-        }
-    }
-    directory.delete();
-}
     
     @AfterMethod
     public void tearDown() {
+        // Quit driver first
         if (driver != null) {
             try {
                 driver.quit();
@@ -83,12 +69,57 @@ private void deleteDirectory(File directory) {
             }
         }
         
+        // Clean up the temporary directory
+        try {
+            if (userDataDirPath != null) {
+                File userDataDir = new File(userDataDirPath);
+                if (userDataDir.exists()) {
+                    deleteDirectory(userDataDir);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: Could not clean up user data directory: " + e.getMessage());
+        }
+        
         // Force kill any remaining Chrome processes
         try {
-            Runtime.getRuntime().exec("pkill -f chrome");
-            Runtime.getRuntime().exec("pkill -f chromedriver");
+            killChromeProcesses();
         } catch (Exception e) {
             // Ignore exceptions
+        }
+    }
+    
+    // Helper method to delete directory recursively
+    private void deleteDirectory(File directory) {
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file);
+                }
+            }
+        }
+        directory.delete();
+    }
+    
+    // Method to kill Chrome processes
+    private void killChromeProcesses() {
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            
+            if (os.contains("win")) {
+                // Windows
+                Runtime.getRuntime().exec("taskkill /f /im chrome.exe");
+                Runtime.getRuntime().exec("taskkill /f /im chromedriver.exe");
+            } else {
+                // Linux/Mac
+                Runtime.getRuntime().exec("pkill -f chrome");
+                Runtime.getRuntime().exec("pkill -f chromedriver");
+            }
+            // Wait a bit for processes to terminate
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            System.out.println("Warning: Could not kill Chrome processes: " + e.getMessage());
         }
     }
 }
