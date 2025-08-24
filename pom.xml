@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.15.0</selenium.version>
         <testng.version>7.8.0</testng.version>
+        <restassured.version>5.3.2</restassured.version>
+        <h2.version>2.2.224</h2.version>
     </properties>
 
     <dependencies>
@@ -23,6 +25,7 @@
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
         </dependency>
+
         <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -30,54 +33,24 @@
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-             <!-- REST Assured for API Testing -->
-     <dependency>
-        <groupId>io.restassured</groupId>
-        <artifactId>rest-assured</artifactId>
-        <version>5.3.2</version>
-        <scope>test</scope>
-     </dependency>
-             <dependencies>
-    <!-- Existing Selenium dependency -->
-    <dependency>
-        <groupId>org.seleniumhq.selenium</groupId>
-        <artifactId>selenium-java</artifactId>
-        <version>4.15.0</version>
-    </dependency>
-    
-    <!-- REST Assured for API Testing -->
-    <dependency>
-        <groupId>io.restassured</groupId>
-        <artifactId>rest-assured</artifactId>
-        <version>5.3.2</version>
-        <scope>test</scope>
-    </dependency>
 
-    <!-- H2 Database for DB Testing Demo -->
-    <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>2.2.224</version>
-        <scope>test</scope>
-    </dependency>
-    
-    <!-- TestNG -->
-    <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>7.8.0</version>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
+        <!-- REST Assured for API Testing -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- H2 Database for DB Testing Demo -->
-    <dependency>
-       <groupId>com.h2database</groupId>
-       <artifactId>h2</artifactId>
-       <version>2.2.224</version>
-       <scope>test</scope>
-    </dependency>
+        <!-- H2 Database for DB Testing Demo -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <!-- Maven Compiler Plugin -->
@@ -90,25 +63,16 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+
             <!-- Maven Surefire Plugin (to run TestNG tests) -->
-                 <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>3.1.2</version>
-    <configuration>
-        <suiteXmlFiles>
-            <suiteXmlFile>testng.xml</suiteXmlFile>
-        </suiteXmlFiles>
-    </configuration>
-</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <suiteFiles>
-                        <suiteFile>testng.xml</suiteFile>
-                    </suiteFiles>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
                 </configuration>
             </plugin>
         </plugins>
